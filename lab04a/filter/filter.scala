@@ -2,6 +2,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import scala.util.Try
+import scala.util.matching.Regex
 import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
 import java.time.Instant
@@ -39,6 +40,7 @@ object filter {
 
     val kafkaServer = "spark-master-1:6667"
     val kafkaOffset = if (offset == "earliest") offset else " { \"%s\": { \"0\": %s } } ".format(kafkaTopic, offset)
+    val kafkaOutputDir = outputDir.replaceAll("^file:/", "")
     val kafkaParams = Map(
       "kafka.bootstrap.servers" -> kafkaServer,
       "subscribe" -> kafkaTopic,
@@ -84,14 +86,14 @@ object filter {
       .drop(col("e_type"))
       .write
       .partitionBy("p_date")
-      .text(outputDir + "/view")
+      .text(kafkaOutputDir + "/view")
 
     logs
       .filter(col("e_type") === lit("buy"))
       .drop(col("e_type"))
       .write
       .partitionBy("p_date")
-      .text(outputDir + "/buy")
+      .text(kafkaOutputDir + "/buy")
 
     // ------------------------------ Освобождаем ресурсы
     spark.stop
