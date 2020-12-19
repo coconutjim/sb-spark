@@ -40,7 +40,7 @@ object filter {
 
     val kafkaServer = "spark-master-1:6667"
     val kafkaOffset = if (offset == "earliest") offset else " { \"%s\": { \"0\": %s } } ".format(kafkaTopic, offset)
-    val kafkaOutputDir = outputDir.replaceAll("^file:/", "hdfs:/")
+    val kafkaOutputDir = outputDir.replaceAll("^file:", "")
     val kafkaParams = Map(
       "kafka.bootstrap.servers" -> kafkaServer,
       "subscribe" -> kafkaTopic,
