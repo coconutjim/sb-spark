@@ -69,28 +69,21 @@ object filter {
       .load
       .withColumn("valueParsed", from_json(col("value").cast("string"), schema))
       .select(col("valueParsed.*"), getDate(col("valueParsed.timestamp")).alias("date"))
-      .select(to_json(struct(col("category"), col("event_type"),
-        col("item_id"), col("item_price"),
-        col("timestamp"), col("uid"),
-        col("date"))).alias("value")
-        , col("date").alias("p_date")
-        , col("event_type").alias("e_type"))
+      .select(col("*"), col("date").alias("p_date"))
 
     // ------------------------------ Запись
 
     logs
-      .filter(col("e_type") === lit("view"))
-      .drop(col("e_type"))
+      .filter(col("event_type") === lit("view"))
       .write
       .partitionBy("p_date")
-      .text(outputDir + "/view")
+      .json(outputDir + "/view")
 
     logs
-      .filter(col("e_type") === lit("buy"))
-      .drop(col("e_type"))
+      .filter(col("event_type") === lit("buy"))
       .write
       .partitionBy("p_date")
-      .text(outputDir + "/buy")
+      .json(outputDir + "/buy")
 
     // ------------------------------ Освобождаем ресурсы
     spark.stop
