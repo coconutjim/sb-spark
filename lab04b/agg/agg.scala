@@ -70,8 +70,5 @@ object agg {
 
     kafkaSink.start.awaitTermination
 
-    // ------------------------------ Освобождение ресурсов
-
-    spark.stop
   }
 }
